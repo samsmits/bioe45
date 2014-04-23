@@ -11,3 +11,5 @@ Table 6 - Comparison of usual, recent and assigned diets of CAFE participants
 Table 7 - Metadata for COMBO samples, arranged according to the MIMARK standard
 
 Table 8 - Metadata for CAFE samples, arranged according to the MIMARK standard
+
+Table 11 - Proportions of reads in KEGG categories detected in the controlled feeding samples
