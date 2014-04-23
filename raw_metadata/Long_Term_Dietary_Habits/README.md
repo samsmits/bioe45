@@ -6,10 +6,8 @@ Table 4 - Complete list of the dietary categories analyzed for the FFQ questionn
 
 Table 5 - Characteristics of participants in CAFE study.
 
-Table 6 -
+Table 6 - Comparison of usual, recent and assigned diets of CAFE participants
 
-Table 7 -
+Table 7 - Metadata for COMBO samples, arranged according to the MIMARK standard
 
-Table 8 - 
-
-Table 9 - 
+Table 8 - Metadata for CAFE samples, arranged according to the MIMARK standard
