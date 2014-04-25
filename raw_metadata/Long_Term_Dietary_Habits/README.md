@@ -9,7 +9,9 @@ Table 5 - Characteristics of participants in CAFE study.
 Table 6 - Comparison of usual, recent and assigned diets of CAFE participants
 
 Table 7 - Metadata for COMBO samples, arranged according to the MIMARK standard
+			COMBO reads can be found at http://www.ncbi.nlm.nih.gov/sra
 
 Table 8 - Metadata for CAFE samples, arranged according to the MIMARK standard
+			CAFE reads can be found at
 
 Table 11 - Proportions of reads in KEGG categories detected in the controlled feeding samples
