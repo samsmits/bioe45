@@ -29,7 +29,7 @@ patientDiet = patientData(:,1);
 OutHeader = [patientHead dietHeader];
 
 
-%% Create matrix of diets for appending
+%% Create csv file
 
 dietMat = nan(length(patientDiet),length(dietHeader));
 
@@ -64,7 +64,7 @@ for i = 1:178;
            str = patientTextall{i,j};
            fprintf(fid, '%d', str);     % Age
         elseif (4<j) && (j<=20);
-           fprintf(fid, '%s', patientData(i,(j-4)));    %non-diet fields
+           fprintf(fid, '%f', patientData(i,(j-4)));    %non-diet fields
         elseif j>20;
            fprintf(fid,'%s',dietMat(i, (j-20)));        %diet fields
         end
