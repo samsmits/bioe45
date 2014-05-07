@@ -1,0 +1,13 @@
+function [ comMat ] = makeCommunityMatrix(SampleID,taxLevel,Bacteria)
+%% makeCommunityMatrix
+%  takes an array of sampleIDs and returns a matrix of all available
+%  community data at the specified taxon level.
+%
+%  taxLevel = Can be value: 
+                            1 = 
+
+
+
+
+end
+
