@@ -5,12 +5,14 @@ function [ sampIDs ] = getAllSampleIDs(metadata,category,level)
 
 %% Find the header of the metadata that matches the category
 % 
-headers = metadata {1,:};
+headers = metadata(1,:);
 
 %
-categoryRef = strcmpi(category,headers);
+categoryIndex = find(strcmpi(category,headers));
 
-metadata{:,categoryRef}
+column = metadata(2:end,categoryIndex)
+
+columnTrue = find(column == level)
 
 %%
 
