@@ -17,7 +17,16 @@ function [ comMat ] = makeCommunityMatrix(comDat, sampleIDs,taxLevel,Bacteria)
 %     Bacteria = true if only bacteria, false if all available taxa
 
 %% Pseudocode
+% If Bacteria, remove all non-Bacterial samples
+if Bacteria == 'true';
+    phylum = {comData{2:end,4}};
+    bacIndex = find(strcmpi(phylum,'Bacteria'));
+    comData = comData[bacIndex];
+end
 % Find the community data for each sampleID
+
+IDs = {comData{2:end,3}}; 
+  
 
 % Sort community data by taxLevel, combining identical taxa names and
 % summing abundance

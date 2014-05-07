@@ -26,21 +26,29 @@ column = metadata(2:end,colIndex);
 
 % Get row indices for each level
 for i = 1:numel(category); 
-   if ~strcmpi(level(i),'ALL');
-       rowIndex(:,i) = strcmpi(column(:,i),level(i));
-   else
+   allvals = strcmpi(level(i),'ALL');
+   if (allvals == 1);
        rowIndex(:,i) = cellfun(@isempty,column(:,i));
+   else
+       rowIndex(:,i) = strcmpi(column(:,i),level(i));
    end
 end
 
-SubjectIndex = find(rowIndex(:,1));
+allvals = strcmpi(level(1),'ALL');
+if (allvals == 1);
+    SubjectIndex = find(rowIndex(:,1) == 0);
+else
+    SubjectIndex = find(rowIndex(:,1));
+end
 
 % Get SampleIDs from indices
 for i = 2:numel(category)
-    if ~strcmpi(level(i),'ALL');
-        SubjectIndex = intersect(SubjectIndex,find(rowIndex(:,i)));
+    allvals = strcmpi(level(i),'ALL');
+    if (allvals == 1);
+        find(rowIndex(:,i) == 0)
+        SubjectIndex = intersect(SubjectIndex,find(rowIndex(:,i) == 0));
     else
-        SubjectIndex = intersect(SubjectIndex,find(rowIndex(:,i) ~=1));
+        SubjectIndex = intersect(SubjectIndex,find(rowIndex(:,i)));
     end
 end
 
