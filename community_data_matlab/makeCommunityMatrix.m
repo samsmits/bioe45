@@ -20,7 +20,9 @@ function [ comMat ] = makeCommunityMatrix(comDat, sampleIDs,taxLevel,Bacteria)
 
 % Get indexes in community data for all sampleIDs
 
+
 % Find the community data for each sampleID
+  
 
 % Sort community data by taxLevel, combining identical taxa names and
 % summing abundance
