@@ -12,7 +12,9 @@
 % or 1.3-enzyme. 
 %
 % This version currently does not return an error message if you input
-% numbers into the dialog box. 
+% numbers into the dialog box. If you input numbers, the function will find
+% those numbers in the known activities and output the GH families that it
+% is a part of. 
 
 function [spacer, output] = get_family2;
 
@@ -28,6 +30,7 @@ vector_split = strsplit(vector{1}, {' '});
 
 %%
 if check == 1
+    
     for j = 1:length(vector_split)
         
         % for loop that looks for the GH based on known activities
@@ -43,14 +46,15 @@ if check == 1
     fprintf('\n %s %s \n', vector_split{j}, ':');
     fprintf('%s ', output{:});
     
+        if isempty(output) == 1
+            % Prints out message if the input was not a GH found in the database.
+            fprintf('%s', 'This glycoside hydrolase was not found.')
+        end
+        
     end
     
     fprintf('\n');
     
-else
-    % Prints out message if the input was not a GH found in the database.
-    fprintf('%s \n', 'This glycoside hydrolase was not found.')
-
 end
 
 end
