@@ -22,27 +22,27 @@ function [spacer, known_activities] = get_activities2
 load('GH_family.mat');
 
 
-vector = str2double(cell2mat(inputdlg( ...
+vector = str2num(cell2mat(inputdlg( ...
     'Input vector with integers between 1 and 133, separated by spaces or commas:','Input Vector')));
 check = isempty(vector);
 vector_length = length(vector);
 
-for i = 1:vector_length
+% checks if the input is a vector with integers between 1 and 133. 
+if check == 0 & vector >= 1 & vector <= 133
+
+    for i = 1:vector_length
     
-    if check == 0 & vector >= 1 & vector <= 133
-        
         % finds the known activities of that GH family
         known_activities{i} = Activities{vector(i)};
         
         % prints out the GH information to the command window
         fprintf('%s%d%s %s \n', 'Known activities for GH', vector(i), ':', known_activities{i});
+    end
     
     else
         
         % prints out a message if the input was not a number between 1 and 133.
         fprintf('%s \n','You did not enter a vector with integers from  1 to 133.');
-        
-    end
 
 end
 
