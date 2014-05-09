@@ -17,7 +17,12 @@ function [ comMat ] = makeCommunityMatrix(comDat, sampleIDs,taxLevel,Bacteria)
 %     Bacteria = true if only bacteria, false if all available taxa
 
 %% Pseudocode
+
+% Get indexes in community data for all sampleIDs
+
+
 % Find the community data for each sampleID
+  
 
 % Sort community data by taxLevel, combining identical taxa names and
 % summing abundance
