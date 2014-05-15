@@ -13,7 +13,7 @@ function [ combinedDS ] = getCommunityDataFromDS(comDS, metaDS,taxLevel,bacteria
 % bacteria: T/F indicating whether only bacteria or bacteria and other
 % samples are included
 
-DefaultCommDS = comDS(:,[1 3 4 (4+taxLevel) 11]);
+MyCommDS = comDS(:,[1 3 4 (4+taxLevel) 11]);
 
 % convert numeric taxa level to text
 if taxLevel == 1;
@@ -29,51 +29,56 @@ elseif taxLevel == 5;
 elseif taxLevel == 6;
     taxa = 'species';
 end
-        
-
-MyCommDS = DefaultCommDS;
 
 % remove all non-bacteria
 if bacteria
-    EukIndex=cellfun(@(x)strcmpi(x,'Eukaryota'), comDS.domain, 'Uniformoutput',false);
-    ArchIndex=cellfun(@(x)strcmpi(x,'Archaea'), comDS.domain, 'Uniformoutput',false);
-    NonBacIndex = cell2mat(EukIndex) + cell2mat(ArchIndex);
-    posIndexLogical = logical(~NonBacIndex);
+    BacIndex=cellfun(@(x)strcmpi(x,'Bacteria'), comDS.domain, 'Uniformoutput',false);
+    posIndexLogical = logical(cell2mat(BacIndex));
     MyCommDS = MyCommDS(posIndexLogical,:);
 end
 
+%Find uniqe taxa
+uniqueTax = unique(MyCommDS.(taxa));
+uniqueTax = uniqueTax(2:end); %remove '-'
+
+
+sampleVec = {};
+oldID = 0;
+
+
 % look for each sample in community data
 for i = 1:length(metaDS);
+    tic
     study = metaDS.Study{i};
     sampleID = metaDS.Sample_Identifier{i};
-    
+   
     % Each sample has different formatting
     if strcmpi('American_gut_project', study) ;
         id = 17;
         % no change
-        studyIndex = find(MyCommDS.id==id);
     elseif strcmpi('timeseries', study)
         id = 14;
         % no change
-        studyIndex = find(MyCommDS.id==id);
     elseif strcmpi('Muegge', study);
         id = 16;
         % wrong case
-        studyIndex = find(MyCommDS.id==id);
     elseif strcmpi('Yatsunenko', study);
         id = 9;
         % compare only length of sampleID
-        studyIndex = find(MyCommDS.id==id);
     elseif strcmpi('ELDERMET', study);
         id = 5
         % compare only length of sampleID
-        studyIndex = find(MyCommDS.id==id);
     end
     
-    studyDS = MyCommDS(studyIndex,:);
+    if oldID ~= id;
+        
+        studyIndex = find(MyCommDS.id==id);
     
+        studyDS = MyCommDS(studyIndex,2:end);
+    end
     
-    
+  
+        
     if (id == 5 ) || (id == 9)
         sampleIndex = cellfun(@(x) strncmpi(x, sampleID,length(sampleID)),...
             studyDS.name, 'Uniformoutput', false);
@@ -91,15 +96,21 @@ for i = 1:length(metaDS);
     K = find(sampleIndexLogical>0);
     
     if (numel(K)>0)
+        sampleVec{i} = study;
         sampleDS = studyDS(sampleIndexLogical,:);
-        uniqueTax = unique(sampleDS.(taxa));
-        abundanceDS = findAbundance(sampleDS, taxa, uniqueTax); 
+        sampleuniqueTax = unique(sampleDS.(taxa));
+        abundanceDS = findAbundance(sampleDS, taxa, sampleuniqueTax); 
+        %abundanceVec = findAbundanceVec(sampleDS,taxa,uniqueTax);
     end
-    
+ 
+    %abundanceMat(i,:) = abundanceVec;
     if i > 1;
         combinedDS = join(abundanceDS, combinedDS, 'type', 'fullouter', 'mergekeys', true);
     else
         combinedDS = abundanceDS;
     end
+    
+    oldID = id;
+    toc
 end
 

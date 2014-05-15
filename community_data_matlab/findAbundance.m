@@ -4,6 +4,7 @@ function [ outputDS ] = findAbundance( sampleDataset, field, varnames)
 
 outputDS = dataset;
 abundanceVector = zeros(1,length(varnames));
+
 for i = 1:length(sampleDataset);
     for j = 1:numel(varnames);
         varN = varnames{j};
@@ -14,14 +15,16 @@ for i = 1:length(sampleDataset);
                 val = abundanceVector(j);
                 % find spaces/characters and remove
                 varN(ismember(varN,' ,.:;!)')) = [];
-                varN(ismember(varN,'-(')) = ['_']
+                varN(ismember(varN,'-(')) = ['_'];
+                if strncmp(varN,'unclassified',12);
+                    varN = 'unclassified'; 
+                end
             
                 outputDS.(varN) = val;
             end
         end 
     end
 end
-
 
 end
 
