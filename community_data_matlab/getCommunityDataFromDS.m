@@ -96,11 +96,12 @@ for i = 1:length(metaDS);
     K = find(sampleIndexLogical>0);
     
     if (numel(K)>0)
-        sampleVec{i} = study;
+        sampleVec{i} = sampleID;
         sampleDS = studyDS(sampleIndexLogical,:);
         sampleuniqueTax = unique(sampleDS.(taxa));
         abundanceDS = findAbundance(sampleDS, taxa, sampleuniqueTax); 
         %abundanceVec = findAbundanceVec(sampleDS,taxa,uniqueTax);
+        abundanceDS.Properties.ObsNames = {sampleID};
     end
  
     %abundanceMat(i,:) = abundanceVec;
