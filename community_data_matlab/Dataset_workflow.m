@@ -7,13 +7,13 @@ metadataset = dataset('File','allMetadata_underscoreHeaders.csv',...
                 
                 
 %Convert community data into dataset                
-communitydataset = dataset('File','all-assignments.csv',...
-                    'ReadVarNames',true,'ReadObsNames',false,...
-                    'Delimiter',',');
+%communitydataset = dataset('File','all-assignments.csv',...
+%                    'ReadVarNames',true,'ReadObsNames',false,...
+%                    'Delimiter',',');
                 
-filterFields = {'Age','Pregnant'};
+filterFields = {'Age','Pregnant','Pregnant_Due_Date'};
 
-Filtervalues = {'ALL','yes'};
+Filtervalues = {'ALL','yes','ALL'};
                 
 myData = getFilteredDataset( metadataset, filterFields,Filtervalues );
 
