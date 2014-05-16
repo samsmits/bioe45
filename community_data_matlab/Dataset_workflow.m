@@ -11,24 +11,35 @@ metadataset = dataset('File','allMetadata_underscoreHeaders.csv',...
 %                    'ReadVarNames',true,'ReadObsNames',false,...
 %                    'Delimiter',',');
                 
-filterFields = {'Age','Pregnant','Pregnant_Due_Date'};
+filterFields = {'Age','Sex','Pregnant','Pregnant_Due_Date','Contraceptive'};
 
-Filtervalues = {'ALL','yes','ALL'};
+Filtervalues = {'ALL','Female','yes','ALL','All'};
                 
-myData = getFilteredDataset( metadataset, filterFields,Filtervalues );
+isPreg = getFilteredDataset( metadataset, filterFields,Filtervalues );
 
-isPreg = myData;
+LogicalhasDueDate = cell2mat(cellfun(@(x) strcmpi(x,'none'),...
+    isPreg.Pregnant_Due_Date, 'UniformOutput',false));
 
-LogicalhasAge = cell2mat(cellfun(@(x) strcmpi(x,'none'),isPreg.Age,'UniformOutput',false));
+isPreg(logical(LogicalhasDueDate),:) = [];
 
-isPreg(logical(LogicalhasAge),:) = [];
+Filtervalues = {'ALL','Female','notsure','none','ALL'};
 
-LogicalisPreg = cell2mat(cellfun(@(x) str2num(x)>15,isPreg.Age,'UniformOutput',false));
+maybPreg = getFilteredDataset( metadataset, filterFields,Filtervalues );
 
-isPreg = isPreg(logical(LogicalisPreg),:);
+Filtervalues = {'ALL','Female','ALL','none','ALL'};
 
-LogicalisPreg = cell2mat(cellfun(@(x) str2num(x)<=45,isPreg.Age,'UniformOutput',false));
+female = getFilteredDataset( metadataset, filterFields,Filtervalues );
 
-isPreg = isPreg(logical(LogicalisPreg),:);
+LogicalisPreg = cell2mat(cellfun(@(x) strcmpi(x,'yes'),female.Pregnant,...
+    'UniformOutput',false));
 
-myCommunity = getCommunityDataFromDS(communitydataset, isPreg,2,true);
+LogicalmayBPrg = cell2mat(cellfun(@(x) strcmpi(x,'notsure'),female.Pregnant,...
+    'UniformOutput',false));
+
+female(logical(LogicalisPreg),:) = [];
+
+female(logical(LogicalmayBPrg),:) = [];
+
+
+
+%myCommunity = getCommunityDataFromDS(communitydataset, isPreg,2,true);

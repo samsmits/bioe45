@@ -7,17 +7,21 @@ metadataset = dataset('File','allMetadata_underscoreHeaders.csv',...
                 
                 
 %Convert community data into dataset                
-communitydataset = dataset('File','all-assignments.csv',...
-                    'ReadVarNames',true,'ReadObsNames',false,...
-                    'Delimiter',',');
+%communitydataset = dataset('File','all-assignments.csv',...
+%                    'ReadVarNames',true,'ReadObsNames',false,...
+%                    'Delimiter',',');
                 
-filterFields = {'Age','Pregnant','Pregnant_Due_Date'};
+filterFields = {'Age','Sex','Pregnant','Pregnant_Due_Date','Contraceptive'};
 
-Filtervalues = {'ALL','yes','ALL'};
+Filtervalues = {'ALL','Female','yes','ALL','All'};
                 
-myData = getFilteredDataset( metadataset, filterFields,Filtervalues );
+isPreg = getFilteredDataset( metadataset, filterFields,Filtervalues );
 
-isPreg = myData;
+Filtervalues = {'ALL','Female','notsure','ALL','ALL'};
+
+maybPreg = 
+
+
 
 LogicalhasAge = cell2mat(cellfun(@(x) strcmpi(x,'none'),isPreg.Age,'UniformOutput',false));
 
