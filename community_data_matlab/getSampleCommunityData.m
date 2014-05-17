@@ -28,7 +28,8 @@ comSampleCol = comDat(:,3);
 % Allocate a cell array to store the community data for all samples
 allCommData = {length(sampleIDs)};
 
-% Loop through all sampleIDs
+% Loop through all sampleIDs and store the communities for each sample ID
+% in the allCommData cell array
 for i = 1:length(sampleIDs)
 
     sample = sampleIDs{1};     
