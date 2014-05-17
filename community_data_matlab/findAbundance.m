@@ -19,12 +19,12 @@ for i = 1:length(sampleDataset);
                 if strncmp(varN,'unclassified',12);
                     varN = 'unclassified'; 
                 end
-            
                 outputDS.(varN) = val;
             end
         end 
     end
 end
+
 
 end
 
