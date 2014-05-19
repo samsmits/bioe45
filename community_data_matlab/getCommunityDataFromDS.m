@@ -83,9 +83,12 @@ for i = 1:length(metaDS);
         sampleIndex = cellfun(@(x) strncmpi(x, sampleID,length(sampleID)),...
             studyDS.name, 'Uniformoutput', false);
     elseif (id == 17);
-        combSample = strcat('00000', sampleID);
-        sampleIndex = cellfun(@(x) strncmpi(x, combSample, 9),...
+        sampleID = strcat('00000', sampleID);
+        sampleIndex = cellfun(@(x) strncmpi(x, sampleID, 9),...
             studyDS.name, 'Uniformoutput', false);
+        while size(sampleID) < 16;
+            sampleID = strcat(sampleID,'0');
+        end
     else
         sampleIndex = cellfun(@(x) strcmpi(x, sampleID),...
             studyDS.name, 'Uniformoutput', false);
@@ -99,13 +102,16 @@ for i = 1:length(metaDS);
         sampleVec{i} = sampleID;
         sampleDS = studyDS(sampleIndexLogical,:);
         sampleuniqueTax = unique(sampleDS.(taxa));
-        abundanceDS = findAbundance(sampleDS, taxa, sampleuniqueTax); 
+        sampleID = {sampleID};
+        abundanceDS = findAbundance(sampleDS, taxa, sampleuniqueTax,sampleID); 
         %abundanceVec = findAbundanceVec(sampleDS,taxa,uniqueTax);
-        abundanceDS.Properties.ObsNames = {sampleID};
+        %idCell = {'Sample_Identifier'; sampleID};
+        %abundanceDS = join(cell2dataset(idCell), abundanceDS,'type','fullouter', 'mergekeys', true);
     end
  
     %abundanceMat(i,:) = abundanceVec;
     if i > 1;
+        disp(sampleID)
         combinedDS = join(abundanceDS, combinedDS, 'type', 'fullouter', 'mergekeys', true);
     else
         combinedDS = abundanceDS;

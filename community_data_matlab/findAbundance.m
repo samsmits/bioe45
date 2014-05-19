@@ -1,9 +1,11 @@
-function [ outputDS ] = findAbundance( sampleDataset, field, varnames)
+function [ outputDS ] = findAbundance( sampleDataset, field, varnames,studyID)
 %UNTITLED3 Summary of this function goes here
 %   Detailed explanation goes here
 
 outputDS = dataset;
 abundanceVector = zeros(1,length(varnames));
+
+outputDS.('Sample_Identifier') = studyID;
 
 for i = 1:length(sampleDataset);
     for j = 1:numel(varnames);
