@@ -77,18 +77,21 @@ for i = 1:length(metaDS);
         studyDS = MyCommDS(studyIndex,2:end);
     end
     
+    
   
         
     if (id == 5 ) || (id == 9)
         sampleIndex = cellfun(@(x) strncmpi(x, sampleID,length(sampleID)),...
             studyDS.name, 'Uniformoutput', false);
     elseif (id == 17);
+        k = findstr(sampleID, '.')
+        if 
         sampleID = strcat('00000', sampleID);
-        sampleIndex = cellfun(@(x) strncmpi(x, sampleID, 9),...
+        sampleIndex = cellfun(@(x) strncmpi(x, sampleID, length(sampleID)),...
             studyDS.name, 'Uniformoutput', false);
-        if size(sampleID) < 16;
-            sampleID = strcat(sampleID,'0');
-        end
+        %while size(sampleID) < 16;
+        %    sampleID = strcat(sampleID,'0');
+        %end
     else
         sampleIndex = cellfun(@(x) strcmpi(x, sampleID),...
             studyDS.name, 'Uniformoutput', false);
@@ -102,6 +105,7 @@ for i = 1:length(metaDS);
         sampleVec{i} = sampleID;
         sampleDS = studyDS(sampleIndexLogical,:);
         sampleuniqueTax = unique(sampleDS.(taxa));
+        sampleID = {sampleID};
         abundanceDS = findAbundance(sampleDS, taxa, sampleuniqueTax,sampleID); 
         %abundanceVec = findAbundanceVec(sampleDS,taxa,uniqueTax);
         %idCell = {'Sample_Identifier'; sampleID};
@@ -110,7 +114,7 @@ for i = 1:length(metaDS);
  
     %abundanceMat(i,:) = abundanceVec;
     if i > 1;
-        sampleID
+        disp(sampleID)
         combinedDS = join(abundanceDS, combinedDS, 'type', 'fullouter', 'mergekeys', true);
     else
         combinedDS = abundanceDS;

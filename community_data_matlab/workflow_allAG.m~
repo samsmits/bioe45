@@ -7,12 +7,12 @@ metadataset = dataset('File','allMetadata_underscoreHeaders.csv',...
                 
                 
 %%Convert community data into dataset                
-communitydataset = dataset('File','all-assignments.csv',...
-                    'ReadVarNames',true,'ReadObsNames',false,...
-                    'Delimiter',',');
+%communitydataset = dataset('File','all-assignments.csv',...
+%                    'ReadVarNames',true,'ReadObsNames',false,...
+%                    'Delimiter',',');
 
 %%
-filterFields = {'Age','Sex'};
+filterFields = {'Age','Sex','Primary_Vegetable'};
 
 Filtervalues = {'ALL'};
                 

@@ -77,18 +77,24 @@ for i = 1:length(metaDS);
         studyDS = MyCommDS(studyIndex,2:end);
     end
     
+    
   
         
     if (id == 5 ) || (id == 9)
         sampleIndex = cellfun(@(x) strncmpi(x, sampleID,length(sampleID)),...
             studyDS.name, 'Uniformoutput', false);
     elseif (id == 17);
-        sampleID = strcat('00000', sampleID);
-        sampleIndex = cellfun(@(x) strncmpi(x, sampleID, 9),...
-            studyDS.name, 'Uniformoutput', false);
+        finddot = findstr(sampleID, '.');
+        if finddot ==5;
+            sampleID = strcat('00000', sampleID);
+        else
+            sampleID = strcat('0000', sampleID);
+        end
         while size(sampleID) < 16;
             sampleID = strcat(sampleID,'0');
         end
+        sampleIndex = cellfun(@(x) strncmpi(x, sampleID, length(sampleID)),...
+            studyDS.name, 'Uniformoutput', false);
     else
         sampleIndex = cellfun(@(x) strcmpi(x, sampleID),...
             studyDS.name, 'Uniformoutput', false);
