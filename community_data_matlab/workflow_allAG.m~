@@ -12,16 +12,23 @@ metadataset = dataset('File','allMetadata_underscoreHeaders.csv',...
 %                    'Delimiter',',');
 
 %%
-filterFields = {'Age','Sex','Primary_Vegetable'};
+uniqueSamples = unique(communitydataset.name);
+uniqueSamples = cell2dataset(uniqueSamples,'VarNames',{'Sample_Identifier'});
 
-Filtervalues = {'ALL'};
-                
-allAGD = getFilteredDataset( metadataset, filterFields,Filtervalues );
-
+%%
 
 
-allCommunity = getCommunityDataFromDS(communitydataset, allAGD,2,true);
-
+allPhylum = getCommunityDataFromDS(communitydataset, uniqueSamples,1,true);
+%%
+allClass = getCommunityDataFromDS(communitydataset, uniqueSamples,2,true);
+%%
+allOrder = getCommunityDataFromDS(communitydataset, uniqueSamples,3,true);
+%%
+allFamily = getCommunityDataFromDS(communitydataset, uniqueSamples,4,true);
+%%
+allGenus = getCommunityDataFromDS(communitydataset, uniqueSamples,5,true);
+%%
+allSpecies = getCommunityDataFromDS(communitydataset, uniqueSamples,6,true);
 %% Making Matrix
 
 commCell = dataset2cell(allCommunity(1:1929,:));
