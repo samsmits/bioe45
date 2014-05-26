@@ -15,7 +15,7 @@ for row = 1:length(SampleID_antibiotics(:,1))
     SampleID_antibiotics{row,3} = 0; % type 1
     SampleID_antibiotics{row,4} = 0; % type 2
     SampleID_antibiotics{row,5} = 0; % type 3
-    SampleID_antibiotics{row,6} = 0;
+    SampleID_antibiotics{row,6} = 0; % other
 end
 
 for i = 1:length(uniqueAntibiotics) % loops through each antibiotic
