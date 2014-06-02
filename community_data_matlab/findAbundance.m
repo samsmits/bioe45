@@ -1,12 +1,10 @@
-function [ outputDS ] = findAbundance( sampleDataset, field, varnames,studyID)
-%UNTITLED3 Summary of this function goes here
-%   Detailed explanation goes here
+function [ outputDS ] = findAbundance( sampleDataset, field, varnames)
+%Helper function for *getCommunityDataFromDS.m*
+% This function takes a dataset, a column name, and all the unique taxa and
+% returns a dataset of abundances for each sample
 
 outputDS = dataset;
 abundanceVector = zeros(1,length(varnames));
-
-outputDS.('Sample_Identifier') = studyID;
-
 for i = 1:length(sampleDataset);
     for j = 1:numel(varnames);
         varN = varnames{j};
@@ -18,9 +16,7 @@ for i = 1:length(sampleDataset);
                 % find spaces/characters and remove
                 varN(ismember(varN,' ,.:;!)')) = [];
                 varN(ismember(varN,'-(')) = ['_'];
-                if strncmp(varN,'unclassified',12);
-                    varN = 'unclassified'; 
-                end
+            
                 outputDS.(varN) = val;
             end
         end 
