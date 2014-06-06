@@ -16,7 +16,7 @@
 % activities. 
 
 
-function [spacer, known_activities] = get_activities2
+function [spacer, known_activities] = get_GH_enzymeactivities
 
 
 load('GH_family.mat');
