@@ -16,7 +16,7 @@
 % those numbers in the known activities and output the GH families that it
 % is a part of. 
 
-function [spacer, output] = get_family2;
+function [spacer, output] = get_GH_family2;
 
 load('GH_family.mat');
 
