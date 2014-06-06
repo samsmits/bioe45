@@ -1,9 +1,9 @@
+function [data] = getColumnData(fileName, columnName)
 %% getColumnData
 % This function retrieves the data of the column from the file, specified by fileName,
 % with the header columnName. Extended to accept a cell array of column
 % names, and have the output reflect all specified columns in the order
 % they are specified in the input.
-function [data] = getColumnData(fileName, columnName)
 if(~iscell(columnName))
     D = read_mixed_csv(fileName, ',');
     for i = 0:size(D,2)-1
