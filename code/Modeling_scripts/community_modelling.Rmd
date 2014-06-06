@@ -1,0 +1,493 @@
+Community data modelling
+========================================================
+
+
+```{r}
+library(ggplot2)
+library(vegan)
+library(wesanderson)
+
+## Read in Community matrix and format it 
+
+# Read in csv for Community Matrix (not normalized)
+class = read.csv("~/Documents/AllAntibiotic_Class_notNormalized_antibioticClass.csv")
+dim(class)
+names(class)[1:10]
+# Grab just numeric columns
+classNumeric = class[,-1*c(1:7)]
+# Eliminate columns that are all zeros
+classNumeric=classNumeric[,colSums(classNumeric) !=0]
+# Rebind string and numeric data into one dataframe
+classDat = data.frame(class[,c(1:7)],classNumeric)
+```
+
+
+```{r}
+## Read in genus data and format it (normalized)
+genus = read.csv("~/Documents/AllAntibiotic_Genus.csv")
+dim(genus)
+names(genus)[1:10]
+# Take only the numeric fields
+genusNum = genus[,-1*c(1:6)]
+# Get rid of fields that are 0
+genusNum=genusNum[,colSums(genusNum) !=0]
+# Scale everything to 1000 reads and round 
+genusScale=apply(genusNum,1:2, function(x) 1e+03 * x)
+genusScale = floor(genusScale)
+# Rebind numeric and string data into one data frame
+genusDat = data.frame(genus[,c(1:6)],genusScale)
+
+
+```
+
+
+```{r}
+## Plot alpha diversity
+
+# Plot alpha diversity for Genus
+divG = data.frame(specnumber(genusScale))
+colnames(divG) = "richness"
+shannonG = data.frame(diversity(genusScale,index="shannon"))
+colnames(shannonG) = "shannon"
+type = genus[,2]
+type=factor(type,levels(type)[c(4,2,1,5,3)])
+shannonGplot=cbind(shannonG,type)
+richnessGplot = data.frame(divG,type)
+
+# Plot shannon diversity
+ggplot(shannonGplot,aes(x=type,y=shannon,fill=type))+geom_boxplot()+ggtitle("Alpha diversity at genus level") + scale_fill_manual(values = wes.palette(5,"Darjeeling"))
+
+# Do a t-test on just week and month
+weekMonthIdx = shannonGplot$type == "week" | shannonGplot$type == "month"
+weekMonth = shannonGplot[weekMonthIdx,]
+
+t.test(weekMonth$shannon~weekMonth$type)
+
+# Do a t-test on just week and multipleyear
+weekMyearIdx = shannonGplot$type == "week" | shannonGplot$type == "multipleyear"
+weekMyear = shannonGplot[weekMyearIdx,]
+
+t.test(weekMyear$shannon~weekMyear$type)
+
+# Plot richness
+ggplot(richnessGplot,aes(x=type,y=richness,fill=type))+geom_boxplot()+ggtitle("Alpha diversity at genus level") + xlab("") + ylab("richness") + scale_fill_manual(values = wes.palette(5,"Darjeeling"))
+
+# Do a t-test on just week and month
+weekMonthIdx = richnessGplot$type == "week" | richnessGplot$type == "month"
+weekMonth = richnessGplot[weekMonthIdx,]
+
+t.test(weekMonth$richness~weekMonth$type)
+
+# Do a t-test on just week and myear
+weekMyearIdx = richnessGplot$type == "week" | richnessGplot$type == "multipleyear"
+weekMyear = richnessGplot[weekMyearIdx,]
+
+t.test(weekMyear$richness~weekMyear$type)
+
+```
+There is no significant difference in shannon's diversity between the week group and month group as well as wekk and multiple year group.
+
+There is a significant difference in observed richness between the week group and the month group 
+```{r}
+# plot alpha diversity for class
+divC = data.frame(specnumber(classNumeric))
+colnames(divC) = "richness"
+shannonC = data.frame(diversity(classNumeric,index="shannon"))
+colnames(shannonC) = "shannon"
+shannonCplot=cbind(shannonC,type)
+richnessCplot = data.frame(divC,type)
+
+# Plot shannon diversity for class
+ggplot(shannonCplot,aes(x=type,y=shannon,fill=type))+geom_boxplot()+ggtitle("Alpha diversity at class level")+scale_fill_manual(values = wes.palette(5,"Darjeeling"))
+
+# t-test to see if week is different than month
+weekMonthIdx = shannonCplot$type == "week" | shannonCplot$type == "month"
+weekMonth = shannonCplot[weekMonthIdx,]
+
+t.test(weekMonth$shannon~weekMonth$type)
+
+# t-test to see if week is different than multipleyear
+weekMyearIdx = shannonCplot$type == "week" | shannonCplot$type == "multipleyear"
+weekMyear = shannonCplot[weekMyearIdx,]
+
+t.test(weekMyear$shannon~weekMyear$type)
+
+ggplot(richnessCplot,aes(x=type,y=richness,fill=type))+geom_boxplot()+ggtitle("Alpha diversity at class level") + xlab("") + ylab("richness")+scale_fill_manual(values = wes.palette(5,"Darjeeling"))
+
+# Do a t-test on just week and month
+weekMonthIdx = richnessCplot$type == "week" | richnessCplot$type == "month"
+weekMonth = richnessCplot[weekMonthIdx,]
+
+t.test(weekMonth$richness~weekMonth$type)
+
+# Do a t-test on just week and myear
+weekMyearIdx = richnessCplot$type == "week" | richnessCplot$type == "multipleyear"
+weekMyear = richnessCplot[weekMyearIdx,]
+
+t.test(weekMyear$richness~weekMyear$type)
+
+```
+No significant differences at the class level between the week and month or multipleyear
+```{r}
+## Filter data set 
+
+## Class level
+# Select only samples who have taken antibiotics in the past week 
+weekIDX =  class$Type == "week" 
+week = class[weekIDX,]
+dim(week)
+# There are 38 samples that are week
+
+# Select only samples who have taken antibiotics in the past month
+monthIdx = class$Type == "month"
+month = class[monthIdx,]
+dim(month)
+# THere are 59 samples that are month so we want to subsample to have equal size groups
+set.seed(1)
+monthSampIdx = sample(59,38)
+monthSamp = month[monthSampIdx,]
+dim(monthSamp)
+
+# Combine into one dataset called recent of just samples from the past week and month
+recentClass = rbind(monthSamp,week)
+rowSums(recentClass[,-1*c(1:7)])
+row.names(recentClass)
+recentClass = recentClass[-40,]
+
+## Genus level
+weekIDX =  genusDat$Type == "week" 
+week = genusDat[weekIDX,]
+dim(week)
+# There are 38 samples that are week
+
+# Select only samples who have taken antibiotics in the past month
+monthIdx = genusDat$Type == "multipleyear"
+month = genusDat[monthIdx,]
+dim(month)
+# THere are 59 samples that are month so we want to subsample to have equal size groups
+set.seed(1)
+monthSampIdx = sample(1471,38)
+monthSamp = month[monthSampIdx,]
+dim(monthSamp)
+
+# Combine into one dataset called recent of just samples from the past week and month
+recentGenus = rbind(monthSamp,week)
+
+
+```
+
+```{r}
+# Run random forests to see which factors separate these two groups
+library(randomForest)
+
+## Class level
+
+# Get rid of extraneous columns
+recentClassnum = recentClass[,-c(1:7)]
+
+# Get rid of columns with all zeros
+recentClassnum = recentClassnum[,colSums(recentClassnum) !=0]
+
+# Normalize counts
+classScale=t(apply(recentClassnum,1, function(x) 1e+03 * x/sum(x)))
+
+
+# Add in factor of interest - in this case type
+Type = recentClass$Type[drop=TRUE]
+recentClassDat = data.frame(Type,recentClassnum)
+
+
+
+# Run random forests
+class.recent.rf <- randomForest(Type ~ ., data = recentClassDat, importance = TRUE, proximity = TRUE)
+                                
+print(class.recent.rf)
+
+class.recent.mds <- cmdscale(1 - class.recent.rf$proximity, eig = TRUE)
+varImpPlot(class.recent.rf,main="")
+
+```
+The results from this random forest show that Bacteroidia, Erysipelotrichi, Fusobacteria, Gammaproteobacteria, clostridia, and Bacilli are the most important factors for accuracy in classification. 
+
+We will now split our samples into train and test groups and use a support vector machine with this small set of factors to try to correctly classify our samples
+
+
+```{r}
+## Use SVM on training set to train model and then validate with test model
+library(e1071)
+
+# Select only the columns listed as important from random forests
+colIdx = colnames(recentClassDat) %in% c("X.Bacteroidia.", "X.Erysipelotrichi.","X.Fusobacteria_class.","X.Gammaproteobacteria.","X.Clostridia.","X.Bacilli.")
+  type=recentClassDat[,1]
+  svmCtrim = data.frame(type,recentClassDat[,colIdx])
+  dim(svmCtrim)
+
+# Number of repetitions
+B=500
+err=rep(0,B)
+
+set.seed(3)
+
+# Resample the test and train groups B times
+for(b in 1:B){
+
+  # separate train and test groups using a 60/40 split
+  train=sample(nrow(svmCtrim),nrow(svmCtrim)*.6) 
+  trainset=svmCtrim[train,]
+  testset=svmCtrim[-train,]
+
+  # Fit the SVM
+  svmfit = svm(type~.,data=trainset,kernel="polynomial",cost=100,scale=TRUE)
+  # Predict with the testset
+  svm.pred <- predict(svmfit,testset[,-1])
+  # Calculate the error rate from the confusion table
+  errorTab = table(predict=svm.pred,truth=testset[,1])
+  err[b] = (errorTab[2]+errorTab[3])/sum(errorTab)
+}
+
+# Mean error across all repetitions
+mean(err)
+
+
+# Lets plot the means of these classes between week and month
+ggplot(svmCtrim, aes(x=type,y=X.Bacteroidia.)) + geom_boxplot()
+ggplot(svmCtrim, aes(x=type,y=X.Clostridia.)) + geom_boxplot()
+
+
+```
+
+
+```{r}
+# Lets try modelling with genus
+
+# Get rid of extraneous columns
+recentGenusnum = recentGenus[,-1*c(1:6)]
+
+# Get rid of columns with all zeros
+recentGenusnum = recentGenusnum[,colSums(recentGenusnum) !=0]
+dim(recentGenusnum)
+
+# Add in factor of interest - in this case type
+Type = recentGenus$Type[drop=TRUE]
+recentGenusDat = data.frame(Type,recentGenusnum)
+
+# Run random forests
+genus.recent.rf <- randomForest(Type ~ ., data = recentGenusDat, importance = TRUE, proximity = TRUE)
+
+print(genus.recent.rf)
+
+genus.recent.mds <- cmdscale(1 - genus.recent.rf$proximity, eig = TRUE)
+varImpPlot(genus.recent.rf,main="",cex=.9)
+```
+ lets use Bacillus, Blautia, 313,323,604, and Allstipes
+
+
+```{r}
+## SVM 
+library(e1071)
+
+# Select only the columns listed as important from random forests
+colIdx = colnames(recentGenusDat)== "X.958" | colnames(recentGenusDat)=="X.313" | colnames(recentGenusDat)== "X.1079" | colnames(recentGenusDat)== "X.Akkermansia."| colnames(recentGenusDat)== "X.505"| colnames(recentGenusDat)== "X.Acidaminococcus"
+type=recentGenusDat[,1]
+svmGtrim = data.frame(type,recentGenusDat[,colIdx])
+dim(svmGtrim)
+
+# Number of bootstraps
+B=500
+err=rep(0,B)
+
+set.seed(3)
+
+for(b in 1:B){
+
+# separate train and test groups using a 60/40 split
+train=sample(nrow(svmGtrim),nrow(svmGtrim)*.6) 
+trainset=svmGtrim[train,]
+testset=svmGtrim[-train,]
+
+# Let's try svm
+svmfit = svm(type~.,data=trainset,kernel="polynomial",cost=100,scale=TRUE)
+svm.pred <- predict(svmfit,testset[,-1])
+errorTab = table(predict=svm.pred,truth=testset[,1])
+err[b] = (errorTab[2]+errorTab[3])/sum(errorTab)
+}
+
+mean(err)
+
+
+# Lets plot the means of these genera between week and month
+ggplot(svmGtrim, aes(x=type,y=X.Blautia.)) + geom_boxplot()
+ggplot(svmGtrim, aes(x=type,y=X.323)) + geom_boxplot()
+```
+
+```{r}
+
+# Lets look at categories of antibiotics
+
+# Seperate Class 1's
+class1Idx = recentClass$Class1 == 1
+class1 = recentClass[class1Idx,]
+class1$ClassOther = "Class1"
+
+#Seperate Class 2's
+class2Idx = recentClass$Class2 != 0
+class2 =  recentClass[class2Idx,]
+class2$ClassOther = "Class2"
+
+# Rebind Class 1 and 2
+classClass = rbind(class1,class2)
+
+# Repeat for genus
+
+# Add in factor of interest - in this case type
+recentGenusData=data.frame(recentGenus[,c(1:6)],recentGenusnum)
+anticlass = recentGenusData$ClassOther[drop=TRUE]
+recentGenusDat = data.frame(anticlass,recentGenusnum)
+
+# Seperate Class 1's
+class1Idx = recentGenusData$Class1 == 1
+class1 = recentGenusData[class1Idx,]
+class1$ClassOther = "Class1"
+
+#Seperate Class 2's
+class2Idx = recentGenusData$Class2 != 0
+class2 =  recentGenusData[class2Idx,]
+class2$ClassOther = "Class2"
+
+# Rebind Class 1 and 2
+classGenus = rbind(class1,class2)
+
+```
+
+```{r}
+
+library(ape)
+
+# Hierarchical clustering by time since antibiotic use
+recentGenusnum = recentGenusnum[-40,]
+bdist = vegdist(recentGenusnum,method="bray")
+
+hclust.bc = hclust(bdist,method="average")
+
+colsType=c(rep("red",38),rep("blue",37))
+plot(as.phylo(hclust.bc),direction="downwards",tip.color=colsType,cex=.7,main="Hierarchical clustering of samples at genus level")
+legend("topleft","week","month")
+
+
+# Hierarchical clustering by class of antibiotic
+recentclassClassnum = classClass[,-1*c(1:7)]
+bdist = vegdist(recentclassClassnum,method="bray")
+
+# Dendogram 
+hclust.bc = hclust(bdist,method="average")
+colsClass=c(rep("red",30),rep("blue",25))
+plot(as.phylo(hclust.bc),direction="downwards",tip.color=cols,cex=.8,main="Hierarchical clustering of samples at genus level")
+legend("topright",c("week","month"))
+
+
+# Bray curtis distance looking at class of antibiotic
+
+
+comm.mds=metaMDS(recentclassClassnum,dist="bray")
+
+mds.fig = ordiplot(comm.mds,type="none")
+points(mds.fig,"sites",pch=19,col="blue",select=classClass$ClassOther=="Class1")
+points(mds.fig,"sites",pch=19,col="red",select=classClass$ClassOther=="Class2")
+
+adonis(bdist~ClassOther,data=classClass)
+```
+
+```{r}
+# Redo random forests
+
+classGenus$ClassOther <- as.factor(classGenus$ClassOther)
+classGenusdat = classGenus[,-c(1:5)]
+
+# Run random forests
+class.genus.rf <- randomForest(ClassOther ~ ., data = classGenusdat, importance = TRUE, proximity = TRUE)
+
+print(class.genus.rf)
+
+class.class.mds <- cmdscale(1 - class.genus.rf$proximity, eig = TRUE)
+varImpPlot(class.genus.rf)
+
+```
+
+```{r}
+## Redo SVM with antibiotic classes
+
+# Select only the columns listed as important from random forests
+colIdx = colnames(classClassdat)== "X.Methanobacteria." | colnames(classClassdat)=="X.Clostridia." | colnames(classClassdat)== "X.Sphingobacteria." | colnames(classClassdat)== "X.Gammaproteobacteria."| colnames(classClassdat)== "X.Flavobacteria."| colnames(classClassdat) == "X.Fusobacteria_class."| colnames(classClassdat) == "X.Bacteroidia."
+type=classClassdat[,2]
+classClassNum = classClassdat[,-c(1,2)]
+svmCtrim = data.frame(type,classClassdat[,colIdx])
+dim(svmCtrim)
+
+# Number of bootstraps
+B=500
+err=rep(0,B)
+
+set.seed(3)
+
+for(b in 1:B){
+
+# separate train and test groups using a 60/40 split
+train=sample(nrow(svmCtrim),nrow(svmCtrim)*.7) 
+trainset=svmCtrim[train,]
+testset=svmCtrim[-train,]
+
+# Let's try svm
+svmfit = svm(type~.,data=trainset,kernel="linear",cost=100,scale=TRUE)
+svm.pred <- predict(svmfit,testset[,-1])
+errorTab = table(predict=svm.pred,truth=testset[,1])
+err[b] = (errorTab[2]+errorTab[3])/sum(errorTab)
+}
+
+mean(err)
+```
+
+```{r}
+
+# Redo random forests at genus level with antibiotic class
+
+row.names(re)
+
+# Run random forests
+class.class.rf <- randomForest(ClassOther ~ ., data = classClassdat, importance = TRUE, proximity = TRUE)
+
+print(class.class.rf)
+
+class.class.mds <- cmdscale(1 - class.class.rf$proximity, eig = TRUE)
+varImpPlot(class.class.rf)
+## Redo SVM with antibiotic genera
+
+# Select only the columns listed as important from random forests
+colIdx = colnames(classGenusdat)== "X.958" | colnames(classGenusdat)=="X.880" | colnames(classGenusdat)== "X.90" | colnames(classGenusdat)== "X.675"
+type=classGenusdat[,1]
+classGenusNum = classGenusdat[,-1]
+svmCtrim = data.frame(type,classGenusdat[,colIdx])
+dim(svmCtrim)
+
+# Number of bootstraps
+B=500
+err=rep(0,B)
+
+set.seed(3)
+
+for(b in 1:B){
+
+# separate train and test groups using a 60/40 split
+train=sample(nrow(svmCtrim),nrow(svmCtrim)*.7) 
+trainset=svmCtrim[train,]
+testset=svmCtrim[-train,]
+
+# Let's try svm
+svmfit = svm(type~.,data=trainset,kernel="linear",cost=100,scale=TRUE)
+svm.pred <- predict(svmfit,testset[,-1])
+errorTab = table(predict=svm.pred,truth=testset[,1])
+err[b] = (errorTab[2]+errorTab[3])/sum(errorTab)
+}
+
+mean(err)
+
+# Now with genera
