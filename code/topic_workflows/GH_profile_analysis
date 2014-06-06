@@ -1,0 +1,53 @@
+% Workflow for retrieving GH abundances of commensals and pathogens
+% Calculates 2-sample t-test 
+
+
+
+%% reads the .csv files containing the GH profiles of pathogens
+GH_pathogen0 = read_mixed_csv('kevin-pathogens-cazy.csv', ',');
+GH_pathogen = str2double(GH_pathogen0(2:end, 4:end));
+
+
+%%
+
+pathogen_GHprofile2 = read_mixed_csv('pathogenProfiles');
+
+%% Retrieves GH profiles of pathogens and commensals 
+pathogen_GHprofile = read_mixed_csv('kevin-pathogens-cazy.csv',',');
+commensal_GHprofile = read_mixed_csv('commensal-gh.csv',',');
+allcommensal_GHprofile = read_mixed_csv('more-commensal-gh.csv',',');
+
+commensal_matrix = str2double(commensal_GHprofile(2:end,3:end));
+pathogen_matrix = str2double(pathogen_GHprofile(2:end,4:end));
+allcommensal_matrix = str2double(allcommensal_GHprofile(2:end, 3:end));
+
+%% Normalizes the data before completing t-test
+[h,p] = ttest2(pathogen_matrix, commensal_matrix, 0.01, 'both', 'unequal');
+%%
+sum_pathogen = sum(pathogen_matrix');
+sum_commensal = sum(commensal_matrix');
+sum_allcommensal = sum(allcommensal_matrix');
+
+pathogen_normalized = zeros(21, 120);
+commensal_normalized = zeros(8,120);
+allcommensal_normalized = zeros(415, 120);
+
+for i = 1:21
+    pathogen_normalized(i,:)= pathogen_matrix(i,:)/ sum_pathogen(i);
+end
+
+for i = 1:8
+    commensal_normalized(i,:)= commensal_matrix(i,:)/ sum_commensal(i);
+end
+
+for i = 1:415
+    allcommensal_normalized(i,:) = allcommensal_matrix(i,:) / sum_allcommensal(i);
+end
+
+[h1,p1] = ttest2(pathogen_normalized, commensal_normalized, 0.01, 'both', 'unequal');
+
+[h2,p2] = ttest2(pathogen_normalized, allcommensal_normalized, 0.01, 'both', 'unequal');
+
+
+
+
