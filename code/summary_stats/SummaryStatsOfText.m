@@ -2,13 +2,15 @@ function SummaryStatsOfText( metadata, categories, visible, save, ...
     fullscreen, tickUp )
 % This function loops through categories inputted and creates bar charts.
 % metadata is a file passed in, categories can be one or more categories
-% saved as an array of strings, while visible, save and fulscreen must be
-% 'on' or 'off'
+% saved as an array of strings, while visible, save and fullscreen must be
+% 'on' or 'off'. This function is called by TextAnalysis.m, which guides
+% the user in specifying inputs.
+
 for i=1:length(categories) % loops to create separate bar charts
-    f = figure('Visible', visible);
+    figure('Visible', visible);
     column = strmatch(categories{i}, metadata(1,:), 'exact');
-    uppercaseData = metadata(2:end,column); % to avoid case inconsistencies
-    [u,~,n] = unique(uppercaseData);
+    lowercaseData = lower(metadata(2:end,column)); % to avoid case inconsistencies
+    [u,~,n] = unique(lowercaseData);
     n(n==1) = []; % removes blank entries
     n = n - 1; % adjusts answers because blank entries have been removed
     u = u(2:end); % removes blank category
@@ -50,4 +52,6 @@ for i=1:length(categories) % loops to create separate bar charts
         print('-dpdf', filename);
     end
 end
+u % can be uncommented/moved to display unique responses in a category
+length(u) % can display the number of unique responses
 end
