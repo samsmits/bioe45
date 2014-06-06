@@ -16,15 +16,17 @@ AntiBiodataset = dataset('File','AllAntibiotic_Class_notNormalized_antibioticCla
 Genusdataset = dataset('File','AllAntibiotic_Genus.csv',...
                   'ReadVarNames',true,'ReadObsNames',false,...
                    'Delimiter',','); 
+%load antibiotics_community.mat;
+%load communityDataset.mat;
+%load Antibiotic_group_data.mat;
 %%               
 GHdata = [GHprofile_antibiotic_6month;GHprofile_antibiotic_month; GHprofile_antibiotic_multipleyear; GHprofile_antibiotic_year; GHprofile_antibiotic_week];
 temp = cellstr(agp_sampleID);
 GHID = [temp(Index_antibiotic_6month); temp(Index_antibiotic_month); temp(Index_antibiotic_multipleyear);temp(Index_antibiotic_year); temp(Index_antibiotic_week);]
     
-%%
+%% Calculate Alpha diversity - slow
 
-% Calculate Alpha diversity
-
+% initialize
 Under = [];
 Over = [];
 OverSample = {};
@@ -42,11 +44,13 @@ Agecutoff = 55;
 
 for i = 1:size(AntiBiodataset,1);
     SampleAge = AntiBiodataset.Age(i)
+    % Antibiotic Type
     Type1 = AntiBiodataset.Class1(i);
     Type2 = 3*AntiBiodataset.Class2(i);
     Type3 = 5*AntiBiodataset.Class3(i);
     AntiClass = Type1+Type2+Type3;
     if isnumeric(SampleAge);
+        % Alpha diversity calculated using Simpson's index
         Simpsons = 0;
         CommCell = dataset2cell(Genusdataset(i,3:end));
         CommMat = cell2mat(CommCell(2,:));
@@ -344,11 +348,12 @@ randSample = randi([1,size(HealthyGH102,2)],1,50);
 %%
 figure,
 h=boxplot([HealthyGH35';YeGH35';sixMoGH35'; MoGH35';WeGH35'],group5);
-ylabel('Percent of total GH');
-title('GH35');
+set(gca,'FontSize',15);
+ylabel('Fraction of total GH','FontSize', 15);
+title('GH Family 35 vs Time Since Taking Antibiotic', 'FontSize', 15);
 ylim([-0.00001 0.0001])
 set(h(7,:),'Visible','off')
-ylim([-0.00001 0.00008])
+ylim([-0.000005 0.000065])
 
 randSample = randi([1,size(HealthyGH35,2)],1,500);
 [h, p] = ttest2(HealthyGH35(randSample), sixMoGH35, 0.05,'right', 'equal')
@@ -401,15 +406,16 @@ end
 AgeTime = AgeTimeless;
 
 sumGHdata = sum(GHdata');
+% meanGHdata = repmat(mean(GHdata),2035,1);
+ 
+ %normGHdata35 = sum((GHdata - meanGHdata)');
 
+GHdata35 = GHdata(:,35);%/117;%./sumGHdata' + GHdata(:,24)./sumGHdata' + GHdata(:,35)./sumGHdata' + GHdata(:,43)./sumGHdata' + GHdata(:,102)./sumGHdata' + GHdata(:,103)./sumGHdata' + GHdata(:,114)./sumGHdata';
 
-GHdata35 = GHdata(:,08)./sumGHdata' + GHdata(:,24)./sumGHdata' + GHdata(:,35)./sumGHdata' + GHdata(:,43)./sumGHdata' + GHdata(:,102)./sumGHdata' + GHdata(:,103)./sumGHdata' + GHdata(:,114)./sumGHdata';
+%normGHdata35 = GHdata35/117;
+normGHdata35 = GHdata35./sumGHdata';
 
-GHdata35 = GHdata35/7;
-%normGHdata35 = GHdata35./sumGHdata';
-
-%SimpsonsGHdata = (GHdata/35).^2;
-
+%SimpsonsGHdata = (GHdata/35).^
 %normGHdata35 = sum(SimpsonsGHdata')';
 
 Antibiotic = AntibioticTaken;
@@ -455,6 +461,10 @@ OlderMo = Month(find(AgeMo >=55));
 YoungerMo = Month(find(AgeMo <=55));
 OlderWe = Week(find(AgeWeek >=55));
 YoungerWe = Week(find(AgeWeek <=55));
+
+Y = [YoungerMYear;YoungerYear;Younger6Mo;YoungerMo;YoungerWe]
+O = [OlderMYear; OlderYear;Older6Mo; OlderMo; OlderWe];
+[h,p] = ttest2(Y,O,0.05,'right','unequal')
 
 % Antibiotic Types
 type1 = {'amixicylin','amoxicillin','ampicillin','augmentin','cefadroxil','cefdinir','ceftin','cefotaxime','cefuroxime','cephalexin','cephl','clavulanate','flucloxacillin','kef','lansopraz','omnicef','omoxicillin','penic','rocephin','zocin','zosyn'};
@@ -539,19 +549,17 @@ T3We = MYear(logical(T3WeIndex));
 
 
 % Antibiotic Boxplot
-group5 =[repmat({'Multiple Year: Type 1'}, size(T1MYear,1),1); repmat({'Year: Type 1'},...
-    size(T1Year,1),1); repmat({'6 Month: Type 1'},size(T16Mo,1),1); repmat({'Month: Type 1'}, ...
-    size(T1Mo,1),1); repmat({'Month: Type 1'}, size(T1We,1),1);];% repmat({'Multiple Year: Type 2'},...
-    %size(T2MYear,1),1);repmat({'Year: Type 2'},size(T2Year,1),1);repmat({'6 Month: Type 2'},...
-    % size(T26Mo,1),1); repmat({'Month: Type 2'},size(T2Mo,1),1);repmat({'Week: Type 2'},...
-    %size(T2We,1),1); repmat({'Multiple Year: Type 3'}, size(T3MYear,1),1);  repmat({'Year: Type 3'}, size(T3Year,1),1); ;repmat({'6 Month: Type 3'}, size(T36Mo,1),1);  ;repmat({'Month: Type 3'}, size(T3Mo,1),1);  repmat({'Week: Type 3'}, size(T3We,1),1)]; 
+group5 =[repmat({'Multiple Years'}, size(T1MYear,1),1); repmat({'Type 1'}, size(T1Mo,1),1);repmat({'Type 1'}, size(T1We,1),1); repmat({'Multiple Years'},...
+    size(T2MYear,1),1); repmat({'Type 2'},size(T2Mo,1),1);repmat({'Type 2'},...
+    size(T2We,1),1); repmat({'Multiple Years'}, size(T3MYear,1),1) ;repmat({'Type 3'}, size(T3Mo,1),1);  repmat({'Type 3'}, size(T3We,1),1)]; 
 
-Cat = [T1MYear;T1Year; T16Mo;T1Mo;T1We];%;T2MYear;T2Year; T26Mo;T2Mo;T2We;T3MYear;T3Year; T36Mo;T3Mo;T3We];
+Cat = [T1MYear;T1Mo;T1We;T2MYear;T2Mo;T2We;T3MYear;T3Mo;T3We];
 h = boxplot(Cat, group5)
 %ylim([-0.000001 0.0001])
 set(h(7,:),'Visible','off');
-title('GH114')
-ylabel('Percent of total GH');
+title('GH Family 35 and Antibiotic Type')
+ylabel('Fraction of total GH');
+ylim([-0.000001 0.035])
 
 
 %% Age Boxplot
@@ -568,8 +576,8 @@ h = boxplot(Cat,group6)
 ylabel('Simpsons Diversity Index');
 title('GH profile');
 set(h(7,:),'Visible','off')
-ylim([-0.000001 0.06])
-
+ylim([-0.000001 0.00006])
+%%
 group7 =[repmat({'>55'}, size(OlderMYear,1),1); repmat({'<55'},...
     size(YoungerMYear,1),1);repmat({'>55'}, size(OlderYear,1),1); repmat({'<55'},...
     size(YoungerYear,1),1);repmat({'>55'}, size(Older6Mo,1),1); repmat({'<55'},...
@@ -578,11 +586,11 @@ group7 =[repmat({'>55'}, size(OlderMYear,1),1); repmat({'<55'},...
     size(YoungerWe,1),1)]; 
 figure,
 h = boxplot(Cat, group7);
-ylabel('Percent of total GH');
-title('GH24 vs Age');
+ylabel('Fraction of total GH');
+title('GH Family 103');
 set(h(7,:),'Visible','off')
-ylim([-0.00001 0.06])
-
+ylim([-0.00001 0.0007])
+%%
 group8 =[repmat({'Multiple year'}, size(OlderMYear,1),1); repmat({'Multiple year'},...
     size(YoungerMYear,1),1);repmat({'Year'}, size(OlderYear,1),1); repmat({'Year'},...
     size(YoungerYear,1),1);repmat({'6 Month'}, size(Older6Mo,1),1); repmat({'6 Month'},...
@@ -591,7 +599,7 @@ group8 =[repmat({'Multiple year'}, size(OlderMYear,1),1); repmat({'Multiple year
     size(YoungerWe,1),1)];
 figure,
 h = boxplot(Cat, group8);
-ylabel('Percent of total GH');
-title('GH24 vs Age');
+ylabel('Fraction of total GH');
+title('GH Family 35');
 set(h(7,:),'Visible','off')
-ylim([-0.00001 0.06])
+ylim([-0.00001 0.00008])
